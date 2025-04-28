@@ -7,12 +7,13 @@
 
 ## Overview
 
-**Braindler** is a next-generation AI-native conversational platform, evolving from the historical Braindler-Legacy bots.  
-It combines the power of **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (RAG)**, and **business automation** (powered by **n8n**) to create intelligent, scalable assistants for real-world business use.
+**Braindler** is a next-generation AI-native conversational platform, evolving from the historical Braindler-Legacy pre-AI bots.  
+It combines the power of **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (RAG)**, and **Business automation** to create intelligent, scalable assistants for real-world business use.
 
 Braindler enables companies to deliver human-like dialogues, personalized interactions, and deep integration with external services — all through modular, open-source architecture.
 
 ---
+## What is Braindler Assistaint?
 
 ## Why Braindler?
 
