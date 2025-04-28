@@ -13,7 +13,13 @@ It combines the power of **Large Language Models (LLMs)**, **Retrieval-Augmented
 Braindler enables companies to deliver human-like dialogues, personalized interactions, and deep integration with external services — all through modular, open-source architecture.
 
 ---
-## What is Braindler Assistaint?
+## What is Braindler-Assistant?
+Is Telegram, Whatsapp, Line, Wechat and Instagram bot. When somebody writes to this bot, bot follows special ai-chat-script. Parallel to this, messages sended to owner of bot and he can make corrections for future and now.
+Helps to support and selling department.
+ai-chat-script is a flow diagram from blocks. Each block has text description and some exits (user can chose inline keybord or write text). If action goes out of ai-chat-script, system try to импровизировать. Later system gives suggestions to add most usefull blocks ai-chat-script based on experience.
+Also system запоминает уникальный стиль ответов разных операторов(если общение шло в полу автоматическом режиме) и пытвется не смешивать их между собой
+Если оператор не успевает ответить, то по таймауту запускается ии.
+Пользователь и полуавтоматический оператор общаются каждый в своем стиле и на своем языке, а система корректиркет их ответ для улучшения userexperience
 
 ## Why Braindler?
 
