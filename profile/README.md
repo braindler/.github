@@ -1,159 +1,129 @@
+# Braindler 🚀 — AI-Native Conversational Platform
+
+![Project Status](https://img.shields.io/badge/Status-Active-brightgreen)  
+![Technology](https://img.shields.io/badge/Stack-LLM%20%7C%20RAG%20%7C%20n8n%20Automation%20%7C%20FastAPI-orange)
+
+---
+
+## Overview
+
+**Braindler** is a next-generation AI-native conversational platform, evolving from the historical Braindler-Legacy bots.  
+It combines the power of **Large Language Models (LLMs)**, **Retrieval-Augmented Generation (RAG)**, and **business automation** (powered by **n8n**) to create intelligent, scalable assistants for real-world business use.
+
+Braindler enables companies to deliver human-like dialogues, personalized interactions, and deep integration with external services — all through modular, open-source architecture.
+
+---
+
+## Why Braindler?
+
+- 🧠 RAG-based knowledge retrieval ensures accurate and grounded answers.
+- 🌐 Multichannel support: Telegram bots, Web chat, Slack, and more.
+- 🔥 Native multilingual communication — business speaks in Thai, client in Russian, English, Chinese.
+- ⚙️ Deep business process automation using **n8n** workflows.
+- 📚 Persistent memory per user for contextual continuity.
+- 📈 Scalable microservice architecture with full monitoring and analytics.
+- 🛡️ Open-source and self-hostable, with full data control.
+
+---
+
 ## System Architecture
 
-The Braindler architecture is designed in a modular way to ensure scalability and independent evolution of components. Below is a description of the main system components and their interactions:
+Braindler is modular and scalable by design.  
+**Main components:**
 
-- **1. User Interface (Telegram Bot):**  
-  Users interact with the system through a Telegram bot. The bot implements the logic of receiving messages (e.g., using Telegram Bot API via webhook) and sending responses back to users. It acts as a **thin client**, forwarding requests to the core system. Additional interfaces (web chat, Slack bot, etc.) can be added later following the same principles.
+- **User Interface (e.g., Telegram Bot)**  
+  Thin client handling user interactions. Easily extendable to Web, Slack, WhatsApp, etc.
 
-- **2. Backend Server (Application):**  
-  This is the central orchestrator, implemented as a web service (e.g., with FastAPI or Flask). Core functions:
-  - Receives messages from the bot (via HTTP webhook), creates a request object containing the query text, user/chat info, and dialogue context.
-  - **Processes the request:** Determines whether to answer the question or perform an action (e.g., with a simple classifier or rule-based logic).
-  - **Calls the RAG subsystem:** Forms a search query based on the user's message and retrieves relevant knowledge fragments.
-  - **Prepares a prompt for the LLM:** Combines user input and retrieved data into a single prompt, such as: *"Using the following information: [insert texts], answer the user's question: [question]."*
-  - Sends the prompt to the LLM module and receives the generated answer.
-  - If an action is required (e.g., create a calendar event), the server triggers the appropriate integration module and returns the action result to the user.
-  - Sends the final response (text, buttons, links if applicable) back to the bot for delivery.
-  - Logs all interactions and reports performance metrics.
+- **Backend Server (Core Application)**  
+  Orchestrates message handling, RAG retrieval, LLM generation, and integrations via FastAPI.
 
-- **3. RAG Service (Knowledge Retrieval):**  
-  This subsystem handles Retrieval-Augmented Generation and includes:
-  - **Knowledge storage:** A vector database (e.g., FAISS, Milvus, Pinecone) where each document fragment is stored as an embedding.
-  - **Embedding model:** Converts text queries and documents into a vector space, typically with lightweight models (e.g., SentenceTransformers).
-  - **Search logic:** Calculates embeddings for user queries, finds the nearest neighbors, and returns the top-N relevant fragments.
-  - **Knowledge updates:** New documents are indexed and added to the vector database to keep knowledge up-to-date.
+- **RAG Service (Knowledge Retrieval)**  
+  Vector database (e.g., FAISS, Milvus) + Embedding models for semantic search and augmentation.
 
-- **4. LLM Module:**  
-  A large language model (LLM), such as Llama 3.1, deployed locally. The module:
-  - Runs as a service (via RPC or HTTP) and accepts prepared prompts.
-  - Requires GPU memory for hosting the model to ensure fast inference.
-  - Can operate with streaming outputs to improve user experience.
-  - Allows configuration of generation parameters like maximum length and temperature for determinism.
+- **LLM Module**  
+  Locally deployed LLM (e.g., Llama 3.1) serving through an RPC or HTTP API.
 
-- **5. Integration Modules:**  
-  Components to connect with external systems (e.g., Google Calendar API, CRM systems). They:
-  - Are implemented as adapters or separate services.
-  - Include an action manager to handle "intent recognition" (deciding between generating an answer or executing an action).
-  - Require secured token handling and user authorization (OAuth, API keys).
+- **Integration Modules**  
+  Seamless business actions via n8n workflows: CRM updates, calendar events, email dispatch, etc.
 
-- **6. Databases and Storages:**  
-  Besides the vector store:
-  - **Relational database** for user information, integration tokens, access rights.
-  - **Dialogue history** storage to improve context and analytics.
-  - **Logs and telemetry** data for reporting and optimization.
-
-**Data Flow:**  
-User → Bot → Backend → RAG (knowledge retrieval) → LLM (response generation) → Backend (action handling if needed) → Bot → User.  
-All components log activities and send telemetry metrics. The architecture ensures **scalability**, where each service (bot, backend, RAG, LLM) can scale horizontally via containers and load balancing.
+- **Databases and Storages**  
+  - PostgreSQL for user data, dialogues, integrations.
+  - Vector storage for knowledge base.
+  - Logs and telemetry metrics for monitoring.
 
 ---
 
-## Monitoring and Alerting Plan
+### 📈 Data Flow
 
-To maintain the reliability of Braindler, a comprehensive monitoring system will be implemented, using Prometheus + Grafana (for metrics) and Alertmanager (for alerts). Main areas:
+> **User → Bot → Backend → RAG Retrieval → LLM Generation → Action Handling (n8n) → Bot → User**
 
-- **Performance and Latency Monitoring:**
-  - Bot response time.
-  - Backend processing time.
-  - RAG retrieval time and LLM inference time.
-  - **Metrics:** `request_duration_seconds`, `rag_search_time_ms`, `llm_inference_time_ms`.
-  - **Alerts:** Trigger if response time exceeds 3 seconds consistently.
-
-- **Resource Usage Monitoring:**
-  - GPU utilization and memory usage.
-  - CPU and RAM usage on backend and RAG nodes.
-  - Disk space and I/O performance.
-  - **Metrics:** `gpu_utilization_percent`, `cpu_usage_percent`, `disk_free_bytes`.
-  - **Alerts:** High CPU (>85%), low RAM (<10%), low disk space (<15%).
-
-- **Service Stability Monitoring:**
-  - Health checks for all services (backend, RAG, LLM).
-  - Error rates (HTTP 5xx responses, application exceptions).
-  - Container restarts monitoring.
-  - **Metrics:** `service_up`, `http_requests_total{status="5xx"}`.
-  - **Alerts:** Service down or high 5xx rate.
-
-- **Quality of RAG and LLM Responses:**
-  - Percentage of empty or unsuccessful answers.
-  - RAG results count (number of documents returned).
-  - User feedback (likes/dislikes).
-  - **Metrics:** `unsuccessful_answers_total`, `rag_results_count`, `action_success_rate`.
-  - **Alerts:** High percentage of empty RAG results or failed actions.
-
-- **Business Metrics (external to monitoring system):**
-  - Active user count.
-  - Daily request volume.
-  - Free-to-paid user conversion.
-
-**Tools:**  
-Prometheus exporters for each component, Nvidia exporter for GPUs, Grafana dashboards for visualization, and Sentry for detailed application error tracking.
+All interactions are logged and monitored, with rich metrics and telemetry.
 
 ---
 
-## RAG Module Quality KPIs
+## Monitoring and Alerting
 
-Key metrics to measure RAG module performance:
+Braindler includes a complete observability stack:
 
-- **Precision@K (Relevance):**  
-  How often the top-K returned fragments are relevant.
+- **Prometheus + Grafana**: Monitoring response times, resource usage, and service health.
+- **Alertmanager**: Automatic alerts on service failures, latency spikes, or resource exhaustion.
+- **Sentry**: Error tracking across backend and bot layers.
 
-- **Recall:**  
-  How often relevant documents are successfully retrieved when they exist.
+Key monitored metrics include:
 
-- **RAG Utilization Rate:**  
-  How often RAG data is used in LLM responses.
-
-- **Answer Accuracy/Helpfulness:**  
-  Percentage of fully correct or helpful answers based on human or benchmark evaluation.
-
-- **Average Number of Sources per Answer:**  
-  How many document fragments are retrieved per user query (optimal around 3).
-
-- **RAG Latency:**  
-  Average retrieval time.
-
-- **Knowledge Base Growth vs Performance:**  
-  Monitor retrieval quality as the database size increases.
-
-**Target Goals (for Version 1.0):**
-- Precision@3 > 0.8
-- Recall > 0.9
-- RAG usage > 70% of queries
-- User satisfaction (rating) > 4/5
+| Area | Metrics | Alerts |
+|:----|:-------|:------|
+| Performance | Request time, RAG/LLM latency | Response time > 3 sec |
+| Resources | GPU %, CPU %, RAM usage | High CPU/RAM/Disk alerts |
+| Stability | Service uptime, error rates | 5xx errors, container restarts |
+| Quality | Answer success rates, RAG recall | Low RAG precision, empty answers |
 
 ---
 
-## Additional Recommendations
+## KPIs for RAG Module
 
-- **Use modern LLM frameworks:**  
-  Consider LangChain or similar libraries for faster development and better pipeline management.
+| KPI | Target (v1.0) |
+|:----|:-------------|
+| Precision@3 | > 0.8 |
+| Recall | > 0.9 |
+| RAG Usage Rate | > 70% |
+| User Satisfaction | > 4/5 |
+| RAG Latency | < 500 ms |
 
-- **Implement CI/CD:**  
-  Automated testing and deployment pipelines for faster and safer updates.
+---
 
-- **Optimize for Russian language:**  
-  Fine-tune Llama 3.1 on Russian datasets for better native performance.
+## Technology Stack
 
-- **Keep architecture modular:**  
-  New features should be implemented as independent modules or plugins.
+| Layer | Technology |
+|:------|:-----------|
+| Frontend | Telegram API, Web Chat (future) |
+| Backend | FastAPI (Python 3.11) |
+| Knowledge Base | FAISS / Milvus |
+| LLM | Local deployment (Llama 3.1) |
+| Automation | n8n (self-hosted) |
+| Databases | PostgreSQL, Redis |
+| Monitoring | Prometheus, Grafana, Sentry |
+| Deployment | Docker, Kubernetes-ready |
 
-- **Security by Design:**  
-  Validate all inputs, secure admin access, and provide deployment options for private environments.
+---
 
-- **User Experience Improvements:**  
-  Add custom Telegram buttons, dialogue clarifications, and minimize misunderstanding.
+## Future Roadmap
 
-- **GPU and Inference Optimization:**  
-  Apply quantization (e.g., int8, int4) and batching to optimize LLM performance and resource usage.
+- 🌐 Web client interface (SPA)
+- 🗣️ Multi-turn memory improvements (semantic compression)
+- 🤖 Intelligent fallback from LLM to scripted flows
+- 🔐 Enterprise data privacy modes
+- ✨ Visual flow editor for sales funnels and automations
+- 🧩 Plugin architecture for third-party extensions
+- 📚 Continual knowledge base enrichment with automatic indexing
 
-- **Expand Integrations:**  
-  Plugins for IDEs (e.g., VSCode), browser extensions, and internal knowledge systems (e.g., Confluence).
+---
 
-- **Data Confidentiality:**  
-  Allow users to control data usage policies, offering strict on-record only modes if required.
+## Credits
 
-- **Knowledge Base and Model Updates:**  
-  Regular re-indexing of new documents and model fine-tuning with collected user interaction data.
+Developed by [Anton Dodonov](https://github.com/AntonDodonov),  
+Founder of [NativeMindNet](https://github.com/NativeMindNet) and [Braindler](https://github.com/braindler).
 
-- **Client Analytics:**  
-  Provide analytics dashboards for enterprise clients to track usage, popular topics, and ROI of the assistant.
+---
+
+> 🧠 *Braindler is where AI meets real-world business automation.*
